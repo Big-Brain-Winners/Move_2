@@ -11,6 +11,8 @@
 class UInputMappingContext;
 class UInputAction;
 
+class USpringArmComponent;
+class UCameraComponent;
 
 
 UCLASS()
@@ -26,13 +28,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-protected:
-	void MoveForward(float Value);
-
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void MoveForward(float Value);
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* MoveContext;
@@ -46,9 +46,23 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* RightArmAction;
 
-
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* LookAction;
 
+	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void HandleLimbInput(int32 LimbIndex);
+	void ResetLimbPress();
+
+
+
+	int MoveState;
+	TArray<bool> LimbArray;
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* CamBoom;
+
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* ViewCamera;
 };
