@@ -5,6 +5,17 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 
+// C++ Program to show how to use
+// sleep function
+#include <iostream>
+
+// Library effective with Windows
+#include <windows.h>
+
+// Library effective with Linux
+
+
+
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubSystems.h"
@@ -47,6 +58,11 @@ void AMoveCharacter::Tick(float DeltaTime)
 			Subsystem->AddMappingContext(MoveContext, 0);
 		}
 	}
+	if (bIsMoving)
+	{
+		AddMovementInput(MovementDirection, 1.0f); // Continuous movement
+	}
+
 }
 // Called to bind functionality to input
 void AMoveCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -93,52 +109,103 @@ void AMoveCharacter::Look(const FInputActionValue& Value)
 void AMoveCharacter::HandleLimbInput(int32 LimbIndex)
 {
 	// Prevent duplicate input for the same limb
-	if (LimbArray[LimbIndex]) return;
+	if (LimbArray[LimbIndex])
+	{
+		return;
+	}
 
 	LimbArray[LimbIndex] = true;
 
 	const float MoveDistance = 50.0f; // 0.5 meters
 	FVector ForwardDirection = GetActorForwardVector();
 
+	FTimerHandle MovementTimerHandle;
 
 	// Check state transitions
-	if (MoveState == 0)
+	if (MoveState == 0) //Right leg forward (we ignore 1,2)
 	{
+		UE_LOG(LogTemp, Log, TEXT("COMMAND IN STATE 0"));
+		//UE_LOG(LogTemp, Log, TEXT("LimbArray[3]: %s"), LimbArray[3] ? TEXT("true") : TEXT("false"));
+
 		// Transition from state 0 to 1: Left Leg and Right Arm (Q, R)
-		if (LimbArray[0] && LimbArray[3])
+		if (LimbArray[3])
 		{
-			MoveState = 1;
-			ResetLimbPress();
+			//Left leg goes up
+			//Should be locked here
+			UE_LOG(LogTemp, Log, TEXT("LEFT LEG UP"));
+			if (LimbArray[0]) //If left legforward
+			{
+				//AddMovementInput(GetActorForwardVector(), 3000.0f);
+				//FVector NewLocation = GetActorLocation() + (ForwardDirection * MoveDistance);
+				//SetActorLocation(NewLocation);
+				//AddMovementInput(GetActorForwardVector(), 3000.0f); // Add continuous movement input
 
-			//AddMovementInput(GetActorForwardVector(), 30.0f);
-			FVector NewLocation = GetActorLocation() + (ForwardDirection * MoveDistance);
-			SetActorLocation(NewLocation);
+				MovementDirection = GetActorForwardVector();
+				bIsMoving = true;
 
-			UE_LOG(LogTemp, Log, TEXT("Entered State 1"));
+				// Set timer to stop movement after 3 seconds
+				GetWorld()->GetTimerManager().SetTimer(
+					MovementTimerHandle,
+					this,
+					&AMoveCharacter::StopMovement,
+					0.20f,
+					false // No looping
+				);
+
+				UE_LOG(LogTemp, Log, TEXT("STEPPING LEFT"));
+				//Sleep(1000); //Time for animation
+				UE_LOG(LogTemp, Log, TEXT("STATE 1"));
+				ResetLimbPress();
+				MoveState = 1;
+			}
 		}
 	}
 	else if (MoveState == 1)
 	{
 		// Transition from state 1 to 0: Right Leg and Left Arm (W, E)
-		if (LimbArray[1] && LimbArray[2])
+		if (LimbArray[1])
 		{
-			MoveState = 0;
-			ResetLimbPress();
+			UE_LOG(LogTemp, Log, TEXT("RIGHT LEG UP"));
 
-			//AddMovementInput(GetActorForwardVector(), 30.0f);
-			FVector NewLocation = GetActorLocation() + (ForwardDirection * MoveDistance);
-			SetActorLocation(NewLocation);
+			if(LimbArray[2])
+			{
+				//AddMovementInput(GetActorForwardVector(), 3000.0f);
+				//FVector NewLocation = GetActorLocation() + (ForwardDirection * MoveDistance);
+				//SetActorLocation(NewLocation);
 
-			UE_LOG(LogTemp, Log, TEXT("Entered State 0"));
+
+				MovementDirection = GetActorForwardVector();
+				bIsMoving = true;
+				GetWorld()->GetTimerManager().SetTimer(
+					MovementTimerHandle,
+					this,
+					&AMoveCharacter::StopMovement,
+					0.20f,
+					false // No looping
+				);
+
+				UE_LOG(LogTemp, Log, TEXT("STEPPING RIGHT"));
+				//Sleep(1000); //Time for animation
+				UE_LOG(LogTemp, Log, TEXT("STATE 0"));
+				ResetLimbPress();
+				MoveState = 0;
+			}
 		}
 	}
 }
 
 void AMoveCharacter::ResetLimbPress()
 {
-for (bool& Pressed : LimbArray)
-{
-	Pressed = false;
-}
+	for (bool& Pressed : LimbArray)
+	{
+		Pressed = false;
+	}
 }
 
+void AMoveCharacter::StopMovement()
+{
+	UE_LOG(LogTemp, Log, TEXT("STOPPING MOVEMENT"));
+	AddMovementInput(GetActorForwardVector(), 0.0f); // Stop movement input
+	bIsMoving = false;
+
+}

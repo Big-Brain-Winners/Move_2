@@ -54,6 +54,8 @@ protected:
 	void HandleLimbInput(int32 LimbIndex);
 	void ResetLimbPress();
 
+	void StopMovement();
+
 
 
 	int MoveState;
@@ -65,4 +67,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
+
+
+	bool bIsMoving = false;                 // Is the character currently moving?
+	FVector MovementDirection;              // Direction of movement
 };
