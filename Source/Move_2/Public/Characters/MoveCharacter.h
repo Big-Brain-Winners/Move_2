@@ -1,10 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 #include "InputActionValue.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "MoveCharacter.generated.h"
 
 
@@ -32,7 +32,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void MoveForward(float Value);
 
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputMappingContext* MoveContext;
@@ -49,16 +48,19 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Input)
 	UInputAction* LookAction;
 
-	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void HandleLimbInput(int32 LimbIndex);
-	void ResetLimbPress();
 
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	int GetMoveState();
+
+	void ResetLimbPress();
 	void StopMovement();
 
 
 
-	int MoveState;
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+	int32 MoveState;
 	TArray<bool> LimbArray;
 
 private:

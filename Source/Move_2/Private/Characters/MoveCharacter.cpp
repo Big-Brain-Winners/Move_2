@@ -27,7 +27,7 @@ AMoveCharacter::AMoveCharacter()
 
 	//Setup state and array for movement and limbs
 	MoveState = 0;
-	LimbArray.Init(false, 4);
+	//LimbArray.Init(false, 4);
 
 	//Create boom
 	CamBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CamBoom"));
@@ -86,13 +86,6 @@ void AMoveCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 
 
-
-
-void AMoveCharacter::Move(const FInputActionValue& Value)
-{
-
-}
-
 void AMoveCharacter::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -109,97 +102,58 @@ void AMoveCharacter::Look(const FInputActionValue& Value)
 void AMoveCharacter::HandleLimbInput(int32 LimbIndex)
 {
 	// Prevent duplicate input for the same limb
-	if (LimbArray[LimbIndex])
-	{
-		return;
-	}
+	//if (LimbArray[LimbIndex])
+	//{
+	//	return;
+	//}
 
-	LimbArray[LimbIndex] = true;
+	//LimbArray[LimbIndex] = true;
 
-	const float MoveDistance = 50.0f; // 0.5 meters
+	const float MoveDistance = 40.0f; // 0.5 meters
 	FVector ForwardDirection = GetActorForwardVector();
 
 	FTimerHandle MovementTimerHandle;
 
 	// Check state transitions
-	if (MoveState == 0) //Right leg forward (we ignore 1,2)
+	if (MoveState == 0 && LimbIndex == 0) //Right leg forward (we ignore 1,2)
 	{
-		UE_LOG(LogTemp, Log, TEXT("COMMAND IN STATE 0"));
-		//UE_LOG(LogTemp, Log, TEXT("LimbArray[3]: %s"), LimbArray[3] ? TEXT("true") : TEXT("false"));
-
-		// Transition from state 0 to 1: Left Leg and Right Arm (Q, R)
-		if (LimbArray[3])
-		{
-			//Left leg goes up
-			//Should be locked here
-			UE_LOG(LogTemp, Log, TEXT("LEFT LEG UP"));
-			if (LimbArray[0]) //If left legforward
-			{
-				//AddMovementInput(GetActorForwardVector(), 3000.0f);
-				//FVector NewLocation = GetActorLocation() + (ForwardDirection * MoveDistance);
-				//SetActorLocation(NewLocation);
-				//AddMovementInput(GetActorForwardVector(), 3000.0f); // Add continuous movement input
-
-				MovementDirection = GetActorForwardVector();
-				bIsMoving = true;
-
-				// Set timer to stop movement after 3 seconds
-				GetWorld()->GetTimerManager().SetTimer(
-					MovementTimerHandle,
-					this,
-					&AMoveCharacter::StopMovement,
-					0.20f,
-					false // No looping
-				);
-
-				UE_LOG(LogTemp, Log, TEXT("STEPPING LEFT"));
-				//Sleep(1000); //Time for animation
-				UE_LOG(LogTemp, Log, TEXT("STATE 1"));
-				ResetLimbPress();
-				MoveState = 1;
-			}
-		}
+		UE_LOG(LogTemp, Log, TEXT("Entering State 1"));
+		MovementDirection = GetActorForwardVector();
+		bIsMoving = true;
+		GetWorld()->GetTimerManager().SetTimer(MovementTimerHandle, this, &AMoveCharacter::StopMovement, 0.20f, false); //Move
+		MoveState = 1;
 	}
-	else if (MoveState == 1)
+	if (MoveState == 1 && LimbIndex == 1) //Right leg forward (we ignore 1,2)
 	{
-		// Transition from state 1 to 0: Right Leg and Left Arm (W, E)
-		if (LimbArray[1])
-		{
-			UE_LOG(LogTemp, Log, TEXT("RIGHT LEG UP"));
-
-			if(LimbArray[2])
-			{
-				//AddMovementInput(GetActorForwardVector(), 3000.0f);
-				//FVector NewLocation = GetActorLocation() + (ForwardDirection * MoveDistance);
-				//SetActorLocation(NewLocation);
-
-
-				MovementDirection = GetActorForwardVector();
-				bIsMoving = true;
-				GetWorld()->GetTimerManager().SetTimer(
-					MovementTimerHandle,
-					this,
-					&AMoveCharacter::StopMovement,
-					0.20f,
-					false // No looping
-				);
-
-				UE_LOG(LogTemp, Log, TEXT("STEPPING RIGHT"));
-				//Sleep(1000); //Time for animation
-				UE_LOG(LogTemp, Log, TEXT("STATE 0"));
-				ResetLimbPress();
-				MoveState = 0;
-			}
-		}
+		UE_LOG(LogTemp, Log, TEXT("Entering State 2"));
+		MovementDirection = GetActorForwardVector();
+		bIsMoving = true;
+		GetWorld()->GetTimerManager().SetTimer(MovementTimerHandle, this, &AMoveCharacter::StopMovement, 0.20f, false); //Move
+		MoveState = 2;
+	}
+	if (MoveState == 2 && LimbIndex == 2) //Right leg forward (we ignore 1,2)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Entering State 3"));
+		MovementDirection = GetActorForwardVector();
+		bIsMoving = true;
+		GetWorld()->GetTimerManager().SetTimer(MovementTimerHandle, this, &AMoveCharacter::StopMovement, 0.20f, false); //Move
+		MoveState = 3;
+	}
+	if (MoveState == 3 && LimbIndex == 3) //Right leg forward (we ignore 1,2)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Entering State 0"));
+		MovementDirection = GetActorForwardVector();
+		bIsMoving = true;
+		GetWorld()->GetTimerManager().SetTimer(MovementTimerHandle, this, &AMoveCharacter::StopMovement, 0.20f, false); //Move
+		MoveState = 0;
 	}
 }
 
-void AMoveCharacter::ResetLimbPress()
+int AMoveCharacter::GetMoveState()
 {
-	for (bool& Pressed : LimbArray)
-	{
-		Pressed = false;
-	}
+	//UE_LOG(LogTemp, Log, TEXT("MoveState=", % d), Movestate));
+
+	return MoveState;
 }
 
 void AMoveCharacter::StopMovement()
@@ -209,3 +163,4 @@ void AMoveCharacter::StopMovement()
 	bIsMoving = false;
 
 }
+
